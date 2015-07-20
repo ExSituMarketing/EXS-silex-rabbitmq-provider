@@ -1,0 +1,34 @@
+    {
+    "name": "exs/silex-rabbitmq-provider",
+    "description": "Rabbitmq message provider bundle for Silex2",
+    "keywords": [
+        "silex",
+        "rabbitmq",
+        "message",
+        "provider"
+    ],
+    "homepage": "https://github.com/ExSituMarketing/EXS-silex-rabbitmq-provider",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "slee",
+            "email": "lee@ex-situ.com"
+        }
+    ],
+    "require": {
+        "silex/silex": "~2.0@dev",
+        "exs/silex-request-provider": "dev-master"
+    },
+    "autoload": {
+        "psr-0": {
+            "EXS\\RabbitmqProvider": ""
+        }
+    },
+    "minimum-stability": "dev",
+    "target-dir": "EXS/RabbitmqProvider",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }    
+}
