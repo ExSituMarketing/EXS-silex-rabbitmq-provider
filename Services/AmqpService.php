@@ -72,7 +72,7 @@ class AmqpService
      * @access public
      */
     public function __construct($connections = array())
-    {            
+    {
         $this->_host = $connections['host'];
         $this->_mqUser = $connections['user'];
         $this->_mqPass = $connections['password'];
@@ -111,7 +111,7 @@ class AmqpService
      * @param AMQPConnection $amqpConnection
      * @return \AMQPChannel
      */
-    public function getAmqpChannel(AMQPConnection $amqpConnection)     
+    public function getAmqpChannel(\AMQPConnection $amqpConnection)     
     {
     	$channel = new \AMQPChannel($amqpConnection);
         return $channel;
@@ -122,13 +122,12 @@ class AmqpService
      * @param AMQPChannel $channel
      * @return AMQPExchange
      */
-    public function getAmqpExchange(AMQPChannel $channel) 
+    public function getAmqpExchange(\AMQPChannel $channel) 
     {
     	$exchange = new AMQPExchange($channel);
-        //var_dump(get_class_methods($exchange));
     	$exchange->setName($this->exchangeOptions['name']);
     	$exchange->setType($this->exchangeOptions['type']);
-        $exchange->declare();
+        $exchange->declareExchange();
         
         return $exchange;
     }
@@ -138,11 +137,11 @@ class AmqpService
      * @param AMQPChannel $channel
      * @return AMQPQueue
      */
-    public function getAmqpQue(AMQPChannel $channel)
+    public function getAmqpQue(\AMQPChannel $channel)
     {
     	$queue = new \AMQPQueue($channel);
     	$queue->setName($this->queueOptions['name']);
-    	$queue->declare();
+    	$queue->declareQueue();
     	
     	return $queue;
     }
@@ -180,7 +179,7 @@ class AmqpService
      * @param AMQPConnection $amqpConnection
      * @return boolean
      */
-    public function amqpDisconnect(AMQPConnection $amqpConnection)
+    public function amqpDisconnect(\AMQPConnection $amqpConnection)
     {
 	    if (!$amqpConnection->disconnect()) {
     		return false;
@@ -195,7 +194,7 @@ class AmqpService
      * @return boolean
      * @access public
      */
-    public function amqpSend(AMQPExchange $exchange, $message)
+    public function amqpSend(\AMQPExchange $exchange, $message)
     {
         $messageResponse = $exchange->publish($message, $this->queueOptions['routing_key']);
         if(!$messageResponse) {
@@ -211,7 +210,7 @@ class AmqpService
      * @return array $queArray
      * @access public
      */
-    public function amqpReceive(AMQPQueue $queue, $limit = 1000)
+    public function amqpReceive(\AMQPQueue $queue, $limit = 1000)
     {
         $count = 0;
     	$queArray = array();
@@ -234,7 +233,7 @@ class AmqpService
      * @return array $queArray
      * @access public
      */
-    public function amqpReceiveAll(AMQPQueue $queue)
+    public function amqpReceiveAll(\AMQPQueue $queue)
     {
     	$queArray = array();
     	$queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
@@ -251,7 +250,7 @@ class AmqpService
      * @return array $queArray
      * @access public
      */
-    public function amqpReceiveAndRemove(AMQPQueue $queue)
+    public function amqpReceiveAndRemove(\AMQPQueue $queue)
     {
         $queArray = array();
         $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
@@ -272,7 +271,7 @@ class AmqpService
      * @return array $queArray
      * @access public
      */
-    public function checkDelivery(AMQPQueue $queue)
+    public function checkDelivery(\AMQPQueue $queue)
     {
         $queArray = array();
         $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
@@ -295,7 +294,7 @@ class AmqpService
      * @return void
      * @access public
      */
-    public function removeMessage(AMQPQueue $queue, $inputArray = array())
+    public function removeMessage(\AMQPQueue $queue, $inputArray = array())
     {    
         $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
         foreach($inputArray as $deliveryTag)

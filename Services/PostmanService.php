@@ -23,7 +23,7 @@ class PostmanService
         $this->amqpService = $amqpService;
     }    
     
-    public function publish($message) 
+    public function publish($message = '') 
     {
         if (empty(trim($message))) {
             return false;
