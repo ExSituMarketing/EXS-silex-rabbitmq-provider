@@ -17,7 +17,7 @@ class RabbitmqProvider implements ServiceProviderInterface
     public function register(Container $app)
     {
         $app['exs.serv.amqp'] = ( function ($app) {
-            return new AmqpService($app['rabbit.connections']['default']);
+            return new AmqpService($app['rabbit.connections']['default'], $app['exs.rabbitmq.env']);
         });        
         $app['exs.serv.postman'] = ( function ($app) {
             return new PostmanService($app['exs.serv.amqp']);
