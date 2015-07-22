@@ -71,17 +71,17 @@ class AmqpService
      * @return void
      * @access public
      */
-    public function __construct($connections = array())
+    public function __construct($connections = array(), $env = array())
     {
         $this->_host = $connections['host'];
         $this->_mqUser = $connections['user'];
         $this->_mqPass = $connections['password'];
         $this->_vhost = $connections['vhost'];
         $this->_port = $connections['port'];
-        $this->exchangeOptions['name'] = $connections['exchange'];
-        $this->exchangeOptions['type'] = $connections['type'];
-        $this->queueOptions['name'] = $connections['queue'];
-        $this->queueOptions['routing_key'] = $connections['key'];
+        $this->exchangeOptions['name'] = $env['exchange'];
+        $this->exchangeOptions['type'] = $env['type'];
+        $this->queueOptions['name'] = $env['queue'];
+        $this->queueOptions['routing_key'] = $env['key'];
     }
         
     /**
