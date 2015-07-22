@@ -127,6 +127,7 @@ class AmqpService
     	$exchange = new AMQPExchange($channel);
     	$exchange->setName($this->exchangeOptions['name']);
     	$exchange->setType($this->exchangeOptions['type']);
+        $exchange->setFlags(false);
         $exchange->declareExchange();
         
         return $exchange;
