@@ -2,7 +2,7 @@
 
 namespace EXS\RabbitmqProvider\Services;
 
-use EXS\RabbitmqProvider\Service\AmqpService;
+use EXS\RabbitmqProvider\Services\AmqpService;
 
 /**
  * 
