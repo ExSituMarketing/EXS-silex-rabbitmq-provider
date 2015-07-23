@@ -5,38 +5,70 @@ namespace EXS\RabbitmqProvider\Services;
 use EXS\RabbitmqProvider\Services\AmqpService;
 
 /**
+ * Description of PostmanService
  * 
- *
- * Created 20-May-2015
+ * Publish messages to rabbitmq message queues.
+ * Created      07/31/2015
+ * @author      Lee
  * @copyright   Copyright 2015 ExSitu Marketing.
+ * @access public
  */
 class PostmanService
 {
+
     /**
      * Amqp service
      * @var \EXS\RabbitmqProvider\Service\AmqpService
      */
     protected $amqpService;
-    
+
+    /**
+     * Initiate the service
+     * @param AmqpService $amqpService
+     */
     public function __construct(AmqpService $amqpService)
-    {            
-        $this->amqpService = $amqpService;
-    }    
-    
-    public function publish($message = '') 
     {
-        if (empty(trim($message))) {
-            return false;
+        $this->amqpService = $amqpService;
+    }
+
+    /**
+     * Publish the message to queue 
+     * @param string $message
+     * @return boolean
+     */
+    public function publish($message = '')
+    {
+        $valid = $this->getCleanMessage($message);
+        if ($valid !== false) {
+            $this->processPublish($message);
         }
-        
+    }
+
+    /**
+     * Process message publishing
+     * @param string $message
+     */
+    public function processPublish($message = '')
+    {
         $connetion = $this->amqpService->amqpConnect();
         $channel = $this->amqpService->getAmqpChannel($connetion);
         $exchange = $this->amqpService->getAmqpExchange($channel);
-        $queue = $this->amqpService->getAmqpQue($channel);        
+        $queue = $this->amqpService->getAmqpQue($channel);
         $res = $this->amqpService->amqpSend($exchange, $message);
         $this->amqpService->amqpDisconnect($connetion);
-        
-        return true;
     }
-    
+
+    /**
+     * Remove white spaces in the message
+     * @param string $message
+     * @return mixed
+     */
+    public function getCleanMessage($message = '')
+    {
+        $trimmed = trim($message);
+        if (empty($trimmed)) {
+            return false;
+        }
+        return $trimmed;
+    }
 }

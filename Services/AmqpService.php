@@ -8,9 +8,14 @@ use \AMQPQueue;
 
 /**
  * AMQP class wrapper service
+ * 
+ * Service to bridge services to AMQP php library.
+ * Created      07/31/2015
+ * @author      Lee
+ * @copyright   Copyright 2015 ExSitu Marketing.
  * @access public
  */
-class AmqpService 
+class AmqpService
 {
         
     /**
@@ -38,7 +43,7 @@ class AmqpService
      * Name of vhost to use
      * @access private
      * @var string
-     */    
+     */
     private $_vhost;
     
     /**
@@ -64,20 +69,20 @@ class AmqpService
     protected $queueOptions = array(
         'name' => 'default.queue',
         'routing_key' => 'default.key'
-    );    
+    );
     
     /**
      * MQ constructor
      * @return void
      * @access public
      */
-    public function __construct($connections = array(), $env = array())
+    public function __construct($connection = array(), $env = array())
     {
-        $this->_host = $connections['host'];
-        $this->_mqUser = $connections['user'];
-        $this->_mqPass = $connections['password'];
-        $this->_vhost = $connections['vhost'];
-        $this->_port = $connections['port'];
+        $this->_host = $connection['host'];
+        $this->_mqUser = $connection['user'];
+        $this->_mqPass = $connection['password'];
+        $this->_vhost = $connection['vhost'];
+        $this->_port = $connection['port'];
         $this->exchangeOptions['name'] = $env['exchange'];
         $this->exchangeOptions['type'] = $env['type'];
         $this->queueOptions['name'] = $env['queue'];
@@ -85,24 +90,23 @@ class AmqpService
     }
         
     /**
-     * Establishes connection to MQ 
+     * Establishes connection to MQ
      * @access public
      * @return object $amqpConnection
      */
     public function amqpConnect()
     {
-    	$amqpConnection = new \AMQPConnection();
-    	$amqpConnection->setHost($this->_host);
-    	$amqpConnection->setLogin($this->_mqUser);
-    	$amqpConnection->setPassword($this->_mqPass);
-    	$amqpConnection->setVhost($this->_vhost);
-    	$amqpConnection->setPort($this->_port);
-    	$amqpConnection->connect();
+        $amqpConnection = new \AMQPConnection();
+        $amqpConnection->setHost($this->_host);
+        $amqpConnection->setLogin($this->_mqUser);
+        $amqpConnection->setPassword($this->_mqPass);
+        $amqpConnection->setVhost($this->_vhost);
+        $amqpConnection->setPort($this->_port);
+        $amqpConnection->connect();
    
-    	if(!$amqpConnection->isConnected())
-    	{
-    		return false;
-    	}
+        if (!$amqpConnection->isConnected()) {
+            throw new \Exception("Failed to connect to rabbitmq server");
+        }
         return $amqpConnection;
     }
     
@@ -111,9 +115,9 @@ class AmqpService
      * @param AMQPConnection $amqpConnection
      * @return \AMQPChannel
      */
-    public function getAmqpChannel(\AMQPConnection $amqpConnection)     
+    public function getAmqpChannel(\AMQPConnection $amqpConnection)
     {
-    	$channel = new \AMQPChannel($amqpConnection);
+        $channel = new \AMQPChannel($amqpConnection);
         return $channel;
     }
     
@@ -122,11 +126,11 @@ class AmqpService
      * @param AMQPChannel $channel
      * @return AMQPExchange
      */
-    public function getAmqpExchange(\AMQPChannel $channel) 
+    public function getAmqpExchange(\AMQPChannel $channel)
     {
-    	$exchange = new AMQPExchange($channel);
-    	$exchange->setName($this->exchangeOptions['name']);
-    	$exchange->setType($this->exchangeOptions['type']);
+        $exchange = new AMQPExchange($channel);
+        $exchange->setName($this->exchangeOptions['name']);
+        $exchange->setType($this->exchangeOptions['type']);
         $exchange->setFlags(false);
         $exchange->declareExchange();
         
@@ -140,11 +144,11 @@ class AmqpService
      */
     public function getAmqpQue(\AMQPChannel $channel)
     {
-    	$queue = new \AMQPQueue($channel);
-    	$queue->setName($this->queueOptions['name']);
-    	$queue->declareQueue();
-    	
-    	return $queue;
+        $queue = new \AMQPQueue($channel);
+        $queue->setName($this->queueOptions['name']);
+        $queue->declareQueue();
+        
+        return $queue;
     }
 
     /**
@@ -155,9 +159,9 @@ class AmqpService
      */
     public function setExchangeOption($key, $value)
     {
-        if($key && $value) {
+        if ($key && $value) {
             $this->exchangeOptions[$key] = $value;
-        }            
+        }
         return $this->exchangeOptions[$key];
     }
     
@@ -169,11 +173,11 @@ class AmqpService
      */
     public function setQueueOption($key, $value)
     {
-        if($key && $value) {
+        if ($key && $value) {
             $this->queueOptions[$key] = $value;
-        }   
+        }
         return $this->queueOptions[$key];
-    }    
+    }
     
     /**
      * Establishes disconnection to MQ
@@ -182,10 +186,10 @@ class AmqpService
      */
     public function amqpDisconnect(\AMQPConnection $amqpConnection)
     {
-	    if (!$amqpConnection->disconnect()) {
-    		return false;
-   	 	}   	 	
-        return true;   	 	
+        if (!$amqpConnection->disconnect()) {
+            throw new \Exception("Failed to disconnect from rabbitmq server");
+        }
+        return true;
     }
     
     /**
@@ -198,8 +202,8 @@ class AmqpService
     public function amqpSend(\AMQPExchange $exchange, $message)
     {
         $messageResponse = $exchange->publish($message, $this->queueOptions['routing_key']);
-        if(!$messageResponse) {
-            return false;
+        if (!$messageResponse) {
+            throw new \Exception("Could not publish the rabbitmq message");
         } else {
             return true;
         }
@@ -214,18 +218,18 @@ class AmqpService
     public function amqpReceive(\AMQPQueue $queue, $limit = 1000)
     {
         $count = 0;
-    	$queArray = array();
-    	$queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
+        $queArray = array();
+        $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
         while ($count <= $limit) {
-            if ($message = $queue->get(AMQP_AUTOACK)) {            
-                $queArray[] =  $message->getBody();    
+            if ($message = $queue->get(AMQP_AUTOACK)) {
+                $queArray[] =  $message->getBody();
                 $count++;
             } else {
-                sleep(1);
+                sleep(1); // interval before resume consumming if the que is empty.
             }
         }
 
-    	return $queArray;
+        return $queArray;
     }
     
     /**
@@ -236,14 +240,14 @@ class AmqpService
      */
     public function amqpReceiveAll(\AMQPQueue $queue)
     {
-    	$queArray = array();
-    	$queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
-    	while($message = $queue->get(AMQP_AUTOACK)) {            
-    		$queArray[] =  $message->getBody();    
-    	}  
+        $queArray = array();
+        $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
+        while ($message = $queue->get(AMQP_AUTOACK)) {
+            $queArray[] =  $message->getBody();
+        }
 
-    	return $queArray;
-    }    
+        return $queArray;
+    }
    
     /**
      * read message from MQ and remove them right away
@@ -256,11 +260,10 @@ class AmqpService
         $queArray = array();
         $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
     
-        while($message = $queue->get(AMQP_AUTOACK))
-        {
-                $queArray[] = $message->getBody();
-                $deliveryTag = $message->getDeliveryTag();
-                $queue->ack($deliveryTag);
+        while ($message = $queue->get(AMQP_AUTOACK)) {
+            $queArray[] = $message->getBody();
+            $deliveryTag = $message->getDeliveryTag();
+            $queue->ack($deliveryTag);
         }
     
         return $queArray;
@@ -277,10 +280,8 @@ class AmqpService
         $queArray = array();
         $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
         
-        while($message = $queue->get())
-        {
-            if($message->isRedelivery()) 
-            {
+        while ($message = $queue->get()) {
+            if ($message->isRedelivery()) {
                 $queArray[] = $message->getDeliveryTag()."=".$message->getBody();
             }
         }
@@ -296,16 +297,14 @@ class AmqpService
      * @access public
      */
     public function removeMessage(\AMQPQueue $queue, $inputArray = array())
-    {    
+    {
         $queue->bind($this->exchangeOptions['name'], $this->queueOptions['routing_key']);
-        foreach($inputArray as $deliveryTag)
-        {
-                if(isset($deliveryTag))
-                {
-                        $queue->ack($deliveryTag);
-                }
+        foreach ($inputArray as $deliveryTag) {
+            if (isset($deliveryTag)) {
+                $queue->ack($deliveryTag);
+            }
         }
-    }        
+    }
 }
 
 
