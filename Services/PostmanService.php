@@ -36,11 +36,11 @@ class PostmanService
      * @param string $message
      * @return boolean
      */
-    public function publish($message = '')
+    public function publish($message = '', $isDeclared = true)
     {
         $valid = $this->getCleanMessage($message);
         if ($valid !== false) {
-            $this->processPublish($message);
+            $this->processPublish($message, $isDeclared);
         }
     }
 
@@ -48,12 +48,12 @@ class PostmanService
      * Process message publishing
      * @param string $message
      */
-    public function processPublish($message = '')
+    public function processPublish($message = '', $isDeclared = true)
     {
         $connetion = $this->amqpService->amqpConnect();
         $channel = $this->amqpService->getAmqpChannel($connetion);
-        $exchange = $this->amqpService->getAmqpExchange($channel);
-        $queue = $this->amqpService->getAmqpQue($channel);
+        $exchange = $this->amqpService->getAmqpExchange($channel, $isDeclared);
+        $queue = $this->amqpService->getAmqpQue($channel, $isDeclared);
         $res = $this->amqpService->amqpSend($exchange, $message);
         $this->amqpService->amqpDisconnect($connetion);
     }

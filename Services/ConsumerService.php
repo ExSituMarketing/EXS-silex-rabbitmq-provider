@@ -24,24 +24,22 @@ class ConsumerService
     /**
      * Initiate the service
      * @param AmqpService $amqpService
-     * @param type $terminateSignal
      */
-    public function __construct(AmqpService $amqpService, $terminateSignal = '')
+    public function __construct(AmqpService $amqpService)
     {
         $this->amqpService = $amqpService;
-        $this->terminateSignal = $terminateSignal;
     }
     
     /**
      * Consume all messages in the queue.
      * @return boolean
      */
-    public function consumeAll()
+    public function consumeAll($isDeclared = true)
     {
         $connection = $this->amqpService->amqpConnect();
         $channel = $this->amqpService->getAmqpChannel($connection);
-        $exchange = $this->amqpService->getAmqpExchange($channel);
-        $queue = $this->amqpService->getAmqpQue($channel);
+        $exchange = $this->amqpService->getAmqpExchange($channel, $isDeclared);
+        $queue = $this->amqpService->getAmqpQue($channel, $isDeclared);
         $messages = $this->amqpService->amqpReceiveAll($queue);
         $this->amqpService->amqpDisconnect($connection);
         
@@ -53,12 +51,12 @@ class ConsumerService
      * @param int $limit
      * @return boolean
      */
-    public function consumeWithLimit($limit = 1000)
+    public function consumeWithLimit($limit = 1000, $isDeclared = true)
     {
         $connection = $this->amqpService->amqpConnect();
         $channel = $this->amqpService->getAmqpChannel($connection);
-        $exchange = $this->amqpService->getAmqpExchange($channel);
-        $queue = $this->amqpService->getAmqpQue($channel);
+        $exchange = $this->amqpService->getAmqpExchange($channel, $isDeclared);
+        $queue = $this->amqpService->getAmqpQue($channel, $isDeclared);
         $result = $this->amqpService->amqpReceive($queue, $limit);
         $this->amqpService->amqpDisconnect($connection);
         

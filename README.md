@@ -39,7 +39,7 @@ $app->register(new \EXS\RabbitmqProvider\Providers\Services\RabbitmqProvider());
 Update your rabbitmq connection and environment in your config.php:
 ```php
 //...
-// Rabbit MQ
+// Rabbit MQ connection
 $app['rabbit.connections'] = array(
     'default' => array(
         'host' => 'localhost',
@@ -65,28 +65,48 @@ $app['exs.rabbitmq.env'] = array(
 ## USAGE
 
 
-Publish messages to the queue
+Publish messages to the new exchange queue
 ```php
+//...
 use EXS\RabbitmqProvider\Services\PostmanService;
 
 $postman = new PostmanService();
+
+//Publish messages to the new exchange queue
+$postman->publish($YOUR_MESSAGE_HERE, false);
+
+//Publish messages to the existing exchange queue by other rabbitmq bundle
 $postman->publish($YOUR_MESSAGE_HERE);
-));
+or 
+$postman->publish($YOUR_MESSAGE_HERE, true);
+// setting isDeclared parameter to true will declare the new exchange queue if it doesn't exist.
+//...
+```
 
 Consume messages from the queue
 ```php
+//...
 use EXS\RabbitmqProvider\Services\ConsumerService;
 
 $consumer = new ConsumerService();
+
 // Get all messages from the queue
 $messages = $this->consumerService->consumeAll();
-
 // Get 1000 messages from the queue
 $messages = $this->consumerService->consumeWithLimit(1000);
 
-));
+// Get all messages from the existing exchange queue by other rabbitmq bundle
+$messages = $this->consumerService->consumeAll(false);
+or
+// Get 1000 messages from the new echange queue
+$messages = $this->consumerService->consumeWithLimit(1000, false);
+// setting isDeclared parameter to true will declare the new exchange queue if it doesn't exist
+//...
+```
 
 And now you can publish and consume messages with rabbitmq.
+
+
 
 #### Notice ####
 This provider does not support multiple exchanges or queues. 
