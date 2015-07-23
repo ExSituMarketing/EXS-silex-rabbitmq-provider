@@ -126,14 +126,14 @@ class AmqpService
      * @param AMQPChannel $channel
      * @return AMQPExchange
      */
-    public function getAmqpExchange(\AMQPChannel $channel)
+    public function getAmqpExchange(\AMQPChannel $channel, $isDeclared = true)
     {
         $exchange = new AMQPExchange($channel);
         $exchange->setName($this->exchangeOptions['name']);
         $exchange->setType($this->exchangeOptions['type']);
-        $exchange->setFlags(false);
-        $exchange->declareExchange();
-        
+        if($isDeclared === false) {       
+            $exchange->declareExchange();
+        }
         return $exchange;
     }
     
@@ -142,12 +142,13 @@ class AmqpService
      * @param AMQPChannel $channel
      * @return AMQPQueue
      */
-    public function getAmqpQue(\AMQPChannel $channel)
+    public function getAmqpQue(\AMQPChannel $channel, $isDeclared = true)
     {
         $queue = new \AMQPQueue($channel);
         $queue->setName($this->queueOptions['name']);
-        $queue->declareQueue();
-        
+        if($isDeclared === false) {
+            $queue->declareQueue();
+        }
         return $queue;
     }
 
